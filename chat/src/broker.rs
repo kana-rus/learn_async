@@ -1,15 +1,24 @@
-use std::collections::{HashMap, hash_map::Entry};
+use std::collections::hash_map::{
+    HashMap,
+    Entry,
+};
 use async_std::stream::StreamExt;
-use futures::{SinkExt, channel::mpsc, select, FutureExt};
+use futures::{
+    channel::mpsc,
+    select,
+    FutureExt,
+    SinkExt,
+};
 
 use crate::{
     utils::{
         types::{
             Reciever,
+            Sender,
+            Event,
             Result,
-            Event, Sender,
         },
-        funcs::spawn_with_loging_error
+        funcs::spawn_with_loging_error,
     },
     sender::connection_writer_loop
 };

@@ -5,13 +5,23 @@ mod broker;
 
 
 use async_std::{
-    task,
     stream::StreamExt,
+    task,
     net::{
         TcpListener, TcpStream,
-    }, io::{BufReader, prelude::BufReadExt, stdin, WriteExt},
+    },
+    io::{
+        prelude::BufReadExt,
+        BufReader,
+        WriteExt,
+        stdin,
+    },
 };
-use futures::{channel::mpsc, select, FutureExt};
+use futures::{
+    channel::mpsc,
+    FutureExt,
+    select,
+};
 
 use utils::{
     types::Result,
@@ -31,7 +41,10 @@ pub async fn run_server() -> Result<()> {
     ).await?;
     let mut incoming = listener.incoming();
 
-    let (broker_sender, broker_reciever) = mpsc::unbounded();
+    let (
+        broker_sender,
+        broker_reciever
+    ) = mpsc::unbounded();
     let broker_handle = task::spawn(
         broker_loop(broker_reciever)
     );
@@ -118,7 +131,7 @@ pub async fn run_client() -> Result<()> {
             },
             line = lines_from_stdin.next().fuse() => match line {
                 None => break,
-                Some(line) => writer.write_all((line? + "\n").as_bytes()).await?
+                Some(line) => writer.write_all((line? + "\n").as_bytes()).await?,
             },
         }
     }

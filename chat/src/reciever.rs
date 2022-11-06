@@ -29,7 +29,7 @@ pub(super) async fn connection_loop(mut broker: Sender<Event>, stream: TcpStream
 
     /* Handling Disconnections 2.
         In the reader, we create a _shutdown_sender whose only purpose is to get dropped.
-    */  let (
+    */ let (
         _shutdown_sender,
         shutdown_reciever
     ) = mpsc::unbounded::<Void>();  // -> sender

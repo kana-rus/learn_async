@@ -17,7 +17,7 @@ pub(super) async fn connection_writer_loop(
     stream:   Arc<TcpStream>,
     /* Handling Disconnections 3.
         We add shutdown channel as an argument.
-    */  shutdown: Reciever<Void>,
+    */ shutdown: Reciever<Void>,
 ) -> Result<()> {
     let mut stream = &*stream;
 
@@ -27,7 +27,7 @@ pub(super) async fn connection_writer_loop(
     /* Handling Disconnections 4.
         In the connection_writer_loop, we now need to choose between shutdown and message channels.
         We use the select macro for this purpose:
-    */  loop {  // Because of select, we can't use a while let loop, so we desugar it further into a loop.
+    */ loop {  // Because of select, we can't use a while let loop, so we desugar it further into a loop.
         select! {
             // fuse() is used to turn any `Stream` into a `FusedStream`. This is used for fusing a stream
             // such that poll_next will never again be called once it has finished.
@@ -39,7 +39,7 @@ pub(super) async fn connection_writer_loop(
                 // In the shutdown case we use `match void {}` as a statically-checked unreachable!().
                 Some(void) => match void {},
                 None => break,
-            }
+            },
         }
     }
 
