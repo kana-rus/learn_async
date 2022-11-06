@@ -50,7 +50,7 @@ pub(super) async fn connection_writer_loop(
         there new messages might be pushed into the peer's channel. To not lose these messages completely,
         we'll return the messages channel back to the broker. This also allows us to establish a useful invariant that
         the message channel strictly outlives the peer in the peers map, and makes the broker itself infallible.
-    */
+    */  // -> broker
 
     Ok(())
 }

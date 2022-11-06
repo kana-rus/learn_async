@@ -8,22 +8,27 @@ use async_std::{
     task,
     stream::StreamExt,
     net::{
-        ToSocketAddrs,
-        TcpListener,
-    },
+        TcpListener, TcpStream,
+    }, io::{BufReader, prelude::BufReadExt, stdin, WriteExt},
 };
-use futures::channel::mpsc;
+use futures::{channel::mpsc, select, FutureExt};
 
 use utils::{
     types::Result,
     funcs::spawn_with_loging_error,
+    consts::{
+        TCP_ADDRESS,
+        LISTENING_PORT,
+    },
 };
 use reciever::connection_loop;
 use broker::broker_loop;
 
 
-async fn accept_loop<Addr: ToSocketAddrs>(addr: Addr) -> Result<()> {
-    let listener = TcpListener::bind(addr).await?;
+async fn run_server() -> Result<()> {
+    let listener = TcpListener::bind(
+        format!("{TCP_ADDRESS}:{LISTENING_PORT}")
+    ).await?;
     let mut incoming = listener.incoming();
 
     let (broker_sender, broker_reciever) = mpsc::unbounded();
@@ -94,8 +99,37 @@ async fn accept_loop<Addr: ToSocketAddrs>(addr: Addr) -> Result<()> {
     Ok(())
 }
 
+async fn run_client() -> Result<()> {
+    let stream = TcpStream::connect(
+        format!("{TCP_ADDRESS}:{LISTENING_PORT}")
+    ).await?;
+    // Here we split TcpStream into read and write halves: there's `impl AsyncRead for &'_ TcpStream`,
+    // just like the one in std.
+    let (reader, mut writer) = (&stream, &stream);
+
+    let mut lines_from_server = BufReader::new(reader).lines().fuse();
+    let mut lines_from_stdin = BufReader::new(stdin()).lines().fuse();
+
+    loop {
+        select! {
+            line = lines_from_server.next().fuse() => match line {
+                None => break,
+                Some(line) => println!("{}", line?),
+            },
+            line = lines_from_stdin.next().fuse() => match line {
+                None => break,
+                Some(line) => writer.write_all((line? + "\n").as_bytes()).await?
+            },
+        }
+    }
+
+    Ok(())
+}
+
 fn main() -> Result<()> {
-    task::block_on(
-        accept_loop("127.0.0.1:8080")
-    )
+    task::block_on(async {
+        run_server().await?;
+        run_client().await?;
+        Ok(())
+    })
 }
