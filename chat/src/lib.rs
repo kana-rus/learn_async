@@ -25,7 +25,7 @@ use reciever::connection_loop;
 use broker::broker_loop;
 
 
-async fn run_server() -> Result<()> {
+pub async fn run_server() -> Result<()> {
     let listener = TcpListener::bind(
         format!("{TCP_ADDRESS}:{LISTENING_PORT}")
     ).await?;
@@ -99,7 +99,7 @@ async fn run_server() -> Result<()> {
     Ok(())
 }
 
-async fn run_client() -> Result<()> {
+pub async fn run_client() -> Result<()> {
     let stream = TcpStream::connect(
         format!("{TCP_ADDRESS}:{LISTENING_PORT}")
     ).await?;
@@ -124,12 +124,4 @@ async fn run_client() -> Result<()> {
     }
 
     Ok(())
-}
-
-fn main() -> Result<()> {
-    task::block_on(async {
-        run_server().await?;
-        run_client().await?;
-        Ok(())
-    })
 }
